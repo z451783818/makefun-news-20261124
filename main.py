@@ -1,9 +1,8 @@
-"""make.fun bounty: Sum up 24 November's world news in one image.
+#!/usr/bin/env python3
+"""Entry program: copy the bundled image to the output path.
 
-Writes one image to /output/entry.png.
-Deterministic: copies the bundled asset.png with no network,
-no timestamps and no randomness, so two runs write identical bytes.
-Only the Python standard library is used.
+Standard library only, no network. Reads asset.png next to this file and
+writes it to /output/entry.png (or $MAKEFUN_OUTPUT_DIR/entry.png).
 """
 
 import hashlib
@@ -12,16 +11,18 @@ import shutil
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-SRC = os.path.join(HERE, "asset.png")
-DST = "/output/entry.png"
 
 
 def main():
-    os.makedirs(os.path.dirname(DST), exist_ok=True)
-    shutil.copyfile(SRC, DST)
-    with open(DST, "rb") as f:
-        digest = hashlib.sha256(f.read()).hexdigest()
-    print(f"Wrote {DST} ({os.path.getsize(DST)} bytes, sha256 {digest})")
+    src = os.path.join(HERE, "asset.png")
+    out_dir = os.environ.get("MAKEFUN_OUTPUT_DIR", "/output")
+    os.makedirs(out_dir, exist_ok=True)
+    dst = os.path.join(out_dir, "entry.png")
+    shutil.copyfile(src, dst)
+    with open(dst, "rb") as fh:
+        digest = hashlib.sha256(fh.read()).hexdigest()
+    size = os.path.getsize(dst)
+    print(f"Wrote {dst} ({size} bytes, sha256 {digest})")
     return 0
 
 
